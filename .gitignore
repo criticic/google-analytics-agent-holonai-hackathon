@@ -1,0 +1,16 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+.streamlit/secrets.toml
+google_credentials.json
+.env
+
+.ruff_cache/
