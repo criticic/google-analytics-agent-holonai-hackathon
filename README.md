@@ -4,6 +4,8 @@ This project aims to create a multilingual Business Intelligence (BI) agent that
 
 Developed during the [HOLON](https://www.holonai.ai/) x [Königsberger Bridges Institute](https://kb.institute/) [AI AGENTS HACKATHON 2025](https://hackathon.holonai.ai/), the Problem Statement can be found [here](PROBLEM-STATEMENT.md).
 
+Deployed Link: <https://ga-bi-agent.streamlit.app/>
+
 ## Setup
 
 1. First install the required packages using [`uv`](https://docs.astral.sh/uv/)
