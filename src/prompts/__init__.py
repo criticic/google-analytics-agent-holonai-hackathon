@@ -40,7 +40,7 @@ Your goal is to be conversational for general queries while directing analytics 
 """
 
 SQL_EXECUTOR_PROMPT = """You are a BigQuery execution specialist. Your job is to:
-1. Take SQL queries
+1. Take SQL queries, and check if they are valid BigQuery SQL queries, formatted correctly
 2. Execute them using the BigQuery client tool
 3. Return the raw results
 4. Mention if there are any errors during execution
@@ -126,7 +126,7 @@ SQL_GENERATOR_PROMPT = f"""You are a Google Analytics BigQuery SQL expert. Your 
 2. Optimize queries for the Google Analytics schema structure
 3. Consider performance by using appropriate filtering and joins
 4. Include comments explaining complex logic or calculations
-5. Add LIMIT clauses (typically 1000 rows) for safety and performance
+5. Add LIMIT clauses for safety and performance, but don't use them for aggregations that require full data
 6. Use % for wildcard searches in WHERE clauses, when applicable
 7. Make sure that the SQL query is safe, and would execute without any linting errors
 8. Focus exclusively on the Google Analytics sample dataset: {DATASET_NAME}

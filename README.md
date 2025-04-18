@@ -6,6 +6,18 @@ Developed during the [HOLON](https://www.holonai.ai/) x [Königsberger Bridges I
 
 Deployed Link: <https://ga-bi-agent.streamlit.app/>
 
+## Features
+
+- **Natural Language Queries**: Ask questions about your analytics data in plain English, Mandarin, or Cantonese
+- **Data Visualization**: Automatic generation of charts and visualizations based on query results
+- **SQL Generation**: Converts natural language questions into SQL queries for BigQuery
+- **Intelligent Routing**: Distinguishes between analytics queries and general conversation
+- **Context-Aware Responses**: Maintains conversation history to provide contextually relevant answers
+- **Interactive Web Interface**: User-friendly Streamlit interface with support for streaming responses
+- **Command Line Interface**: Alternative CLI access for quick queries
+- **Secure SQL Execution**: Ensures no harmful SQL queries are executed on the database
+- **LLM Agnostic**: Uses Langchain, so you can easily switch between different LLMs Providers
+
 ## Setup
 
 1. First install the required packages using [`uv`](https://docs.astral.sh/uv/)
