@@ -12,7 +12,7 @@ logger.setLevel(logging.ERROR)
 
 
 # Initialize the model client
-def get_model(temperature=0, model_name="gemini-2.5-flash-preview-04-17"):
+def get_model(temperature=0, model_name="gemini-2.0-flash"):
     """
     Get a configured instance of the ChatGoogleGenerativeAI model.
 
