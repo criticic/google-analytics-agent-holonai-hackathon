@@ -5,14 +5,11 @@ import os
 import sys
 import subprocess
 import logging
+from src.utils.logging import configure_logging
 
-# Configure root logger to ensure logs are displayed
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[logging.StreamHandler()]
-)
-logger = logging.getLogger("bigquery_launcher")
+# Configure logging
+configure_logging()
+logger = logging.getLogger("gabi.web.launcher")
 
 def run_streamlit_app():
     """Run the Streamlit app from the current directory."""
@@ -36,7 +33,6 @@ def run_streamlit_app():
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         universal_newlines=True,
-        bufsize=1  # Line buffered
     )
     
     logger.info("Streamlit process started. Forwarding logs to console...")

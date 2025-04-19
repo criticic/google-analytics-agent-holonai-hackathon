@@ -7,8 +7,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import logging
 
-# Configure logging
-logger = st.logger.get_logger(__name__)
+logger = logging.getLogger("gabi.web.components")
 
 def render_visualization(config, data):
     """
@@ -24,7 +23,6 @@ def render_visualization(config, data):
         return
     
     try:
-        # Convert to pandas DataFrame for visualization
         df = pd.DataFrame(data)
         
         chart_type = config.get("chart_type", "").lower()
@@ -34,17 +32,14 @@ def render_visualization(config, data):
         
         st.subheader(title)
         
-        # Get axis information from the config
         x_field = config.get("x_field") or config.get("x_axis", {}).get("data_key")
         y_field = config.get("y_field") or config.get("y_axis", {}).get("data_key")
         color_by = config.get("color_by")
         
-        # Log visualization parameters
         logger.debug(f"Chart parameters - x: {x_field}, y: {y_field}, color: {color_by}")
         
         fig = None
         
-        # Create appropriate Plotly visualization based on chart type
         if chart_type == "bar" and x_field and y_field and x_field in df.columns and y_field in df.columns:
             fig = px.bar(
                 df,
@@ -85,28 +80,22 @@ def render_visualization(config, data):
             )
             
         elif chart_type == "heatmap" and x_field and y_field and x_field in df.columns and y_field in df.columns:
-            # For heatmap, we need to pivot the data
             if "value" in df.columns:
                 pivot_df = df.pivot(index=y_field, columns=x_field, values="value")
                 fig = px.imshow(pivot_df, title=title)
             else:
-                # If no value column, create a frequency heatmap
                 cross_tab = pd.crosstab(df[y_field], df[x_field])
                 fig = px.imshow(cross_tab, title=title)
                 
         elif chart_type == "table" or not chart_type:
-            # Create a plotly table
             table_columns = config.get("columns", [])
             if table_columns:
-                # Use specific columns if provided
                 headers = [col.get("header", col.get("data_key", "")) for col in table_columns]
                 data_keys = [col.get("data_key", "") for col in table_columns]
                 
-                # Filter dataframe to only include specified columns
                 filtered_columns = [key for key in data_keys if key in df.columns]
                 filtered_df = df[filtered_columns] if filtered_columns else df
                 
-                # Create column headers
                 header_mapping = dict(zip(filtered_columns, headers[:len(filtered_columns)]))
                 filtered_df = filtered_df.rename(columns=header_mapping)
             else:
@@ -132,14 +121,12 @@ def render_visualization(config, data):
             )
             fig.update_layout(title=title)
         
-        # Display the figure if it was created
         if fig:
             st.plotly_chart(fig, use_container_width=True)
             logger.info(f"Successfully rendered {chart_type} visualization")
         else:
             logger.warning(f"Failed to create {chart_type} chart with the provided data")
             st.error(f"Failed to create {chart_type} chart with the provided data.")
-            # Fallback to a table view
             st.dataframe(df, use_container_width=True)
                 
     except Exception as e:

@@ -61,7 +61,7 @@ Deployed Link: <https://ga-bi-agent.streamlit.app/>
 ```plaintext
 .
 ├── .devcontainer
-│   └── devcontainer.json
+│   └── devcontainer.json
 ├── .gitignore
 ├── .python-version
 ├── LICENSE
@@ -72,35 +72,37 @@ Deployed Link: <https://ga-bi-agent.streamlit.app/>
 ├── main.py
 ├── pyproject.toml
 ├── src
-│   ├── __init__.py
-│   ├── cli
-│   │   ├── __init__.py
-│   │   └── app.py
-│   ├── config.py
-│   ├── core
-│   │   ├── __init__.py
-│   │   ├── agents.py
-│   │   └── graph.py
-│   ├── models
-│   │   ├── __init__.py
-│   │   └── gemini.py
-│   ├── prompts
-│   │   └── __init__.py
-│   ├── tools
-│   │   ├── __init__.py
-│   │   └── bigquery.py
-│   └── web
-│       ├── __init__.py
-│       ├── app.py
-│       ├── components
-│       │   ├── __init__.py
-│       │   ├── chat.py
-│       │   ├── sidebar.py
-│       │   └── visualization.py
-│       ├── handlers.py
-│       ├── run.py
-│       └── state.py
+│   ├── __init__.py
+│   ├── cli
+│   │   ├── __init__.py
+│   │   └── app.py
+│   ├── config.py
+│   ├── core
+│   │   ├── __init__.py
+│   │   ├── agents.py
+│   │   └── graph.py
+│   ├── models
+│   │   ├── __init__.py
+│   │   └── gemini.py
+│   ├── prompts
+│   │   └── __init__.py
+│   ├── tools
+│   │   ├── __init__.py
+│   │   └── bigquery.py
+│   ├── utils
+│   │   └── logging.py
+│   └── web
+│       ├── __init__.py
+│       ├── app.py
+│       ├── components
+│       │   ├── __init__.py
+│       │   ├── chat.py
+│       │   ├── sidebar.py
+│       │   └── visualization.py
+│       ├── handlers.py
+│       ├── run.py
+│       └── state.py
 └── uv.lock
 
-10 directories, 32 files
+11 directories, 33 files
 ```

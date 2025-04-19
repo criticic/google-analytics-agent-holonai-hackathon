@@ -14,6 +14,10 @@ import argparse
 from src.cli.app import run_cli
 from src.web.run import run_streamlit_app
 from dotenv import load_dotenv
+from src.utils.logging import configure_logging
+
+# Configure logging first
+configure_logging()
 
 # Load environment variables from .env file
 load_dotenv()

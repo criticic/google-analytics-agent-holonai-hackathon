@@ -5,30 +5,24 @@ import streamlit as st
 import logging
 from uuid import uuid4
 
-# Configure logging
 logger = st.logger.get_logger(__name__)
 
 def initialize_session_state():
     """Initialize all required session state variables"""
     
-    # Initialize chat history
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
         logger.info("Initialized empty chat history")
 
-    # Processing state
     if "is_processing" not in st.session_state:
         st.session_state.is_processing = False
 
-    # Current response data
     if "current_response" not in st.session_state:
         reset_current_response()
     
-    # Query text
     if "query" not in st.session_state:
         st.session_state.query = ""
 
-    # UI placeholders
     if "response_placeholder" not in st.session_state:
         st.session_state.response_placeholder = None
 

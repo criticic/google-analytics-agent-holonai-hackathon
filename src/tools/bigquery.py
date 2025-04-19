@@ -4,6 +4,7 @@ Tools for executing BigQuery operations.
 
 from typing import Dict, Any
 import re
+import logging
 from langchain_core.tools import tool
 from google.cloud import bigquery
 import streamlit as st
@@ -12,6 +13,9 @@ from google.oauth2 import service_account
 from src.config import MAX_RESULTS_DISPLAY, FORBIDDEN_SQL_KEYWORDS
 
 from dotenv import load_dotenv
+
+# Configure logger using the hierarchical naming convention
+logger = logging.getLogger("gabi.tools")
 
 load_dotenv()
 
