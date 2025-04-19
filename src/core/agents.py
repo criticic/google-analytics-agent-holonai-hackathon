@@ -16,6 +16,7 @@ from src.prompts import (
     SQL_EXECUTOR_PROMPT,
     VISUALIZATION_PROMPT,
     CONVERSATION_ROUTER_PROMPT,
+    SQL_REFLECTION_PROMPT,
 )
 from src.models.gemini import get_model
 from src.tools.bigquery import execute_bigquery_sql
@@ -41,6 +42,9 @@ class AnalysisState(TypedDict):
     visualization_config: Dict[str, Any]
     chat_history: Optional[List[Dict[str, str]]]
     requires_analytics: bool  # New field to track if analytics is needed
+    sql_feedback: Optional[str]  # Field to store feedback for SQL regeneration
+    reflection_result: Optional[str]  # Field to store the SQL reflection decision
+    general_response: Optional[str]  # Field to store general conversation response
 
 
 # Initialize the model client
@@ -140,15 +144,20 @@ def sql_generator_node(state: AnalysisState):
     if conversation_context:
         system_prompt += f"\n\nRecent conversation history for context:\n{conversation_context}"
     
+    # Determine if we should include SQL feedback from a prior reflection
+    user_content = f"Convert this question into a BigQuery SQL query: {state['question']}"
+    
+    # If we have feedback from a previous SQL execution, include it
+    if state.get("sql_feedback"):
+        user_content += f"\n\nImportant feedback from previous SQL execution to incorporate:\n{state['sql_feedback']}"
+        
     messages = [
         SystemMessage(content=system_prompt),
-        HumanMessage(
-            content=f"Convert this question into a BigQuery SQL query: {state['question']}"
-        ),
+        HumanMessage(content=user_content),
     ]
     response = model.invoke(messages)
 
-    return {"messages": [response], "sql_query": response.content}
+    return {"messages": [response], "sql_query": response.content, "sql_feedback": None}
 
 
 #######################################
@@ -188,6 +197,86 @@ def sql_executor_node(state: AnalysisState):
 
     # Extract results from the tool response
     return {"messages": [result_message], "query_results": response}
+
+
+#######################################
+# SQL Reflection Node
+#######################################
+
+
+def sql_reflection_node(state: AnalysisState):
+    """
+    Node that evaluates SQL execution results to determine if they're valid and useful.
+    
+    Args:
+        state: The current state of the analytics workflow
+        
+    Returns:
+        Updated state with reflection results and decision to proceed or retry
+    """
+    # Get the original question, SQL query, and query results
+    question = state["question"]
+    sql_query = state["sql_query"]
+    query_results = state["query_results"]
+    
+    # Format the query results for easier analysis
+    formatted_results = str(query_results)
+    if isinstance(query_results, dict) and "results" in query_results:
+        if isinstance(query_results["results"], list):
+            # Include number of results and sample of data
+            result_count = len(query_results["results"])
+            sample = query_results["results"][:5] if result_count > 0 else []
+            formatted_results = f"Total results: {result_count}\nSample: {sample}"
+    
+    # Create the reflection prompt
+    messages = [
+        SystemMessage(content=SQL_REFLECTION_PROMPT),
+        HumanMessage(
+            content=f"""
+            Original question: {question}
+            
+            SQL query executed:
+            {sql_query}
+            
+            Execution results:
+            {formatted_results}
+            
+            Did these results properly answer the question?
+            """
+        ),
+    ]
+    
+    # Get the reflection response
+    response = model.invoke(messages)
+    reflection_content = response.content
+    
+    logger.info(f"SQL reflection: {reflection_content[:100]}...")
+    
+    # Determine if we should proceed or retry based on the reflection
+    should_proceed = reflection_content.upper().startswith("DECISION: PASS")
+    reflection_result = "PASS" if should_proceed else "RETRY"
+    
+    # Extract feedback for SQL regeneration if needed
+    sql_feedback = None
+    if not should_proceed:
+        # Extract the feedback part (after "DECISION: RETRY")
+        decision_marker = "DECISION: RETRY"
+        if decision_marker in reflection_content:
+            sql_feedback = reflection_content[reflection_content.find(decision_marker) + len(decision_marker):].strip()
+        else:
+            sql_feedback = reflection_content
+    
+    # Log both the reflection result and feedback for debugging
+    logger.info(f"SQL reflection decision: {reflection_result}")
+    if sql_feedback:
+        logger.info(f"SQL feedback for retry: {sql_feedback[:100]}...")
+    
+    # Return decision and feedback
+    return {
+        "messages": [response],
+        "reflection_result": reflection_result,
+        "sql_feedback": sql_feedback
+    }
 
 
 #######################################

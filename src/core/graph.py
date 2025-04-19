@@ -6,7 +6,6 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.checkpoint.memory import MemorySaver
 from typing import Dict, Any, AsyncIterator, TypedDict, List, Union, Optional, Callable
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
-import asyncio
 import logging
 
 from src.core.agents import (
@@ -16,6 +15,7 @@ from src.core.agents import (
     results_explainer_node,
     visualization_generator_node,
     conversation_router_node,
+    sql_reflection_node,
 )
 
 # Initialize agent memory
@@ -39,6 +39,7 @@ def create_analytics_graph():
     workflow.add_node("conversation_router", conversation_router_node)
     workflow.add_node("sql_generator", sql_generator_node)
     workflow.add_node("sql_executor", sql_executor_node)
+    workflow.add_node("sql_reflection", sql_reflection_node)
     workflow.add_node("visualization_generator", visualization_generator_node)
     workflow.add_node("results_explainer", results_explainer_node)
 
@@ -80,9 +81,41 @@ def create_analytics_graph():
         }
     )
     
-    # Continue with the standard analytics pipeline
+    # Standard analytics pipeline with SQL, then execution
     workflow.add_edge("sql_generator", "sql_executor")
-    workflow.add_edge("sql_executor", "visualization_generator")
+    
+    # Add SQL reflection node after execution
+    workflow.add_edge("sql_executor", "sql_reflection")
+    
+    # Define conditional routing based on SQL reflection results
+    def route_sql_results(state: AnalysisState) -> str:
+        """Determine whether to proceed with results or retry SQL generation."""
+        reflection_result = state.get("reflection_result", "PASS")
+        
+        # Ensure reflection_result is properly set in the state for handlers to access
+        logger.info(f"SQL Reflection decision: {reflection_result}")
+        
+        if reflection_result == "RETRY":
+            # Log the feedback that will be provided to SQL generator
+            feedback = state.get("sql_feedback", "Results were not satisfactory")
+            logger.info(f"SQL feedback for retry: {feedback[:100]}...")
+            return "sql_generator"
+        else:
+            # Proceed with visualization and explanation
+            logger.info("SQL reflection passed, proceeding with results processing")
+            return "visualization_generator"
+    
+    # Add conditional edges from SQL reflection
+    workflow.add_conditional_edges(
+        "sql_reflection",
+        route_sql_results,
+        {
+            "sql_generator": "sql_generator",  # Route back to SQL generator for retry
+            "visualization_generator": "visualization_generator",  # Continue to visualization
+        }
+    )
+    
+    # Continue with visualization and results explanation
     workflow.add_edge("visualization_generator", "results_explainer")
     workflow.add_edge("results_explainer", END)
 
@@ -90,6 +123,7 @@ def create_analytics_graph():
     graph = workflow.compile(checkpointer=memory)
     logger.info("Analytics graph compiled successfully.")
     graph.get_graph().draw_mermaid_png(output_file_path="analytics_graph.png")
+    logger.info("Analytics graph diagram saved as analytics_graph.png")
 
     return graph
 
@@ -121,7 +155,9 @@ def run_analytics_query(question: str, chat_history: Optional[List[Dict[str, str
         "visualization_config": {},
         "chat_history": chat_history or [],
         "requires_analytics": False,
-        "general_response": ""
+        "general_response": "",
+        "sql_feedback": None,
+        "reflection_result": None
     }
 
     # Execute the workflow
@@ -180,7 +216,9 @@ async def stream_analytics_query(
         "visualization_config": {},
         "chat_history": chat_history or [],
         "requires_analytics": False,
-        "general_response": ""
+        "general_response": "",
+        "sql_feedback": None,
+        "reflection_result": None
     }
 
     # Stream each step of the workflow execution

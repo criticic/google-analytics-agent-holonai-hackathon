@@ -17,6 +17,7 @@ Deployed Link: <https://ga-bi-agent.streamlit.app/>
 - **Command Line Interface**: Alternative CLI access for quick queries
 - **Secure SQL Execution**: Ensures no harmful SQL queries are executed on the database
 - **LLM Agnostic**: Uses Langchain, so you can easily switch between different LLMs Providers
+- **Self Correcting**: A Reflection agent verifies that the SQL query is correct and returns the expected results
 
 ## Setup
 
@@ -67,6 +68,7 @@ Deployed Link: <https://ga-bi-agent.streamlit.app/>
 ├── PROBLEM-STATEMENT.md
 ├── README.md
 ├── __init__.py
+├── analytics_graph.png
 ├── main.py
 ├── pyproject.toml
 ├── src
@@ -100,5 +102,5 @@ Deployed Link: <https://ga-bi-agent.streamlit.app/>
 │       └── state.py
 └── uv.lock
 
-10 directories, 31 files
+10 directories, 32 files
 ```

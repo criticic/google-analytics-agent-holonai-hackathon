@@ -52,6 +52,8 @@ def reset_current_response():
         "sql_query": None,
         "viz_config": None, 
         "viz_data": None,
-        "explanation": None
+        "explanation": None,
+        "reflection_result": None,
+        "sql_feedback": None
     }
     logger.debug("Reset current response data")

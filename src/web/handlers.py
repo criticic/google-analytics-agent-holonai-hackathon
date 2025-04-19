@@ -126,6 +126,11 @@ def handle_stream_event(event: StreamEvent):
                 with st.session_state.sql_placeholder:
                     with st.expander("SQL Query", expanded=True):
                         st.markdown(sql_query)
+            
+            # Update status message
+            if st.session_state.response_placeholder:
+                with st.session_state.response_placeholder:
+                    st.markdown("Generating SQL query...")
     
     elif node == "sql_executor":
         if "query_results" in data.get("sql_executor", {}):
@@ -134,6 +139,30 @@ def handle_stream_event(event: StreamEvent):
             if st.session_state.response_placeholder:
                 with st.session_state.response_placeholder:
                     st.markdown("Running SQL query on BigQuery...")
+    
+    elif node == "sql_reflection":
+        reflection_data = data.get("sql_reflection", {})
+        if reflection_data:
+            # Extract the reflection result and feedback directly from the sql_reflection node data
+            reflection_result = reflection_data.get("reflection_result")
+            sql_feedback = reflection_data.get("sql_feedback")
+            
+            # Store these in session state for reference
+            st.session_state.current_response["reflection_result"] = reflection_result
+            if sql_feedback:
+                st.session_state.current_response["sql_feedback"] = sql_feedback
+            
+            # Log the reflection decision
+            logger.info(f"SQL Reflection decision: {reflection_result}")
+            
+            # Show reflection status in UI
+            if st.session_state.response_placeholder:
+                with st.session_state.response_placeholder:
+                    if reflection_result == "PASS":
+                        st.markdown("SQL results look good, generating visualization...")
+                    elif reflection_result == "RETRY":
+                        feedback_summary = sql_feedback[:100] + "..." if sql_feedback and len(sql_feedback) > 100 else "No specific feedback provided"
+                        st.markdown(f"Refining SQL query to get better results: {feedback_summary}")
     
     elif node == "visualization_generator":
         viz_config = data.get("visualization_generator", {}).get("visualization_config")
