@@ -119,11 +119,13 @@ def render_visualization(config, data):
                             values=list(filtered_df.columns),
                             fill_color="paleturquoise",
                             align="left",
+                            line_color='darkslategray',
                         ),
                         cells=dict(
                             values=[filtered_df[col] for col in filtered_df.columns],
                             fill_color="lavender",
                             align="left",
+                            line_color='darkslategray',
                         ),
                     )
                 ]
