@@ -6,12 +6,8 @@ import logging
 from langchain_google_genai import ChatGoogleGenerativeAI
 from src.config import API_KEY
 
-# Set logging level to ERROR to filter warnings
-logger = logging.getLogger()
-logger.setLevel(logging.ERROR)
+logger = logging.getLogger("gabi.models")
 
-
-# Initialize the model client
 def get_model(temperature=0, model_name="gemini-2.0-flash"):
     """
     Get a configured instance of the ChatGoogleGenerativeAI model.
